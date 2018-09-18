@@ -1,0 +1,61 @@
+version: '3'
+services:
+  php72:
+    build: ./build_php
+    ports:
+      - "9000:9000"
+    volumes:
+      - "$PWD/www:/var/www"
+      - "$PWD/log/php:/var/log/php"
+    networks:
+      - orinfy-network
+
+  mysql:
+    build: ./build_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: admin888
+      #MYSQL_DATABASE: orinfy
+      MYSQL_USER: php
+      MYSQL_PASSWORD: admin888
+    ports: 
+      - "3306:3306"
+    volumes: 
+      - "$PWD/data/mysql:/var/lib/mysql"
+    restart: always
+    networks: 
+      orinfy-network:
+        ipv4_address: 10.10.10.1
+
+  redis:
+    build: ./build_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - "$PWD/data/redis:/var/lib/redis"
+      - "$PWD/log/redis:/var/log/redis"
+    networks: 
+      orinfy-network:
+        ipv4_address: 10.10.10.2
+
+  nginx:
+    build: ./build_nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - "php72"
+    volumes:
+      - "$PWD/etc/nginx/conf.d:/etc/nginx/conf.d"
+      - "$PWD/etc/nginx/certs:/etc/nginx/certs"
+      - "$PWD/log/nginx:/var/log/nginx"
+      - "$PWD/www:/var/www"
+    networks:
+      - orinfy-network
+
+networks:
+  orinfy-network:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.10.0.0/16
