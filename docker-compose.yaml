@@ -21,6 +21,7 @@ services:
       - "3306:3306"
     volumes: 
       - "$PWD/data/mysql:/var/lib/mysql"
+      - "$PWD/log/mysql:/var/log/mysql"
     restart: always
     networks: 
       orinfy-network:
