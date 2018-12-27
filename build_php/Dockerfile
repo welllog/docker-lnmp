@@ -14,10 +14,18 @@ RUN apk --update --no-cache add build-base php7 php7-fpm php7-mysqli php7-json p
     php7-iconv php7-ldap php7-mysqlnd php7-odbc php7-pcntl  php7-posix php7-pspell php7-shmop \
     php7-simplexml php7-soap php7-sockets php7-sodium php7-sqlite3 php7-sysvmsg php7-sysvsem \
     php7-sysvshm php7-tokenizer php7-wddx php7-xmlrpc php7-xmlwriter php7-xsl php7-opcache \
-    php7-zip php7-mongodb php7-mcrypt php7-dev composer\
-    && cd /tmp && wget https://github.com/swoole/swoole-src/archive/v4.1.2.zip && unzip v4.1.2.zip \
+    php7-zip php7-mongodb php7-mcrypt php7-dev php7-pear composer gmp-dev libuv-dev openssl-dev cmake\
+    && pecl install grpc && cd /tmp && wget -c https://codeload.github.com/swoole/swoole-src/zip/master -O sw && unzip sw \
     && cd swoole* && phpize && ./configure --with-php-config=php-config && make && make install \
-    && cd .. && rm -rf * && apk del build-base \
+    && cd .. \
+    && wget -c https://codeload.github.com/datastax/cpp-driver/zip/3fe834b8829734d3949527078b07bc4a0f1245cb -O cpp \
+    && unzip cpp && cd cpp-driver* \
+    && mkdir build && cd build && cmake .. && make && make install && cd ../.. \
+    && wget -c https://codeload.github.com/datastax/php-driver/zip/master -O phpcas \
+    && unzip phpcas && cd php-driver* && cd ext && phpize && ./configure --with-php-config=php-config && make && make install && cd ../.. \
+    && wget -c https://codeload.github.com/laruence/yaf/zip/master -O ya \
+    && unzip ya && cd yaf* && phpize && ./configure --with-php-config=php-config && make && make install && cd .. \
+    && rm -rf * && apk del build-base cmake \
     && sed -i -e 's/;emergency_restart_threshold = 0/emergency_restart_threshold = 15/' /etc/php7/php-fpm.conf \
     && sed -i -e 's/;emergency_restart_interval = 0/emergency_restart_interval = 1m/' /etc/php7/php-fpm.conf
 
